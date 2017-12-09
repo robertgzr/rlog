@@ -39,7 +39,7 @@ func DisableColorOpt(disable bool) Option {
 	return &disableColor{disable}
 }
 func (o *disableColor) Apply(l *logger) {
-	l.color = o.disable
+	l.color = !o.disable
 }
 
 type ctx struct {

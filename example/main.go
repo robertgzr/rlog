@@ -5,14 +5,11 @@ import (
 )
 
 func init() {
-	rlog.Init()
-	rlog.SetColor(false)
+	rlog.ParseEnv()
 }
 
 func main() {
-	l := rlog.New()
-	l.SetLogTime(true)
-	l.AddCtx("magic", 1000)
+	l := rlog.New().With(rlog.LogTimeOpt(), rlog.CtxOpt("magic", 1000))
 	l.Debug("debug")
 	l.Info("info")
 	l.Warn("warning")
