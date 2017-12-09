@@ -42,20 +42,3 @@ func Info(a ...interface{}) {
 func Debug(a ...interface{}) {
 	global.Debug(a...)
 }
-
-// func Init() {
-// 	maxLvl := parseEnv()
-// 	globalLogger.SetMaxLvl(maxLvl)
-// }
-
-// func parseEnv() Lvl {
-// 	lvlstr := os.Getenv(envKey)
-// 	if lvlstr == "" {
-// 		return LvlDebug
-// 	}
-// 	lvl, err := LvlFromString(lvlstr)
-// 	if err != nil {
-// 		return LvlDebug
-// 	}
-// 	return lvl
-// }
