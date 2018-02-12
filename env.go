@@ -4,7 +4,7 @@ import "os"
 
 func ParseEnv() {
 	maxLvl := parseEnv()
-	global.With(MaxLvlOpt(maxLvl))
+	global = global.With(SetMaxLvlOpt(maxLvl))
 }
 
 func parseEnv() Lvl {

@@ -1,9 +1,5 @@
 package rlog
 
-import (
-	"os"
-)
-
 const defaultEnvKey = "GO_LOG"
 
 var (
@@ -13,18 +9,13 @@ var (
 
 func init() {
 	envKey = defaultEnvKey
-	global = new(logger).With(
-		OutputOpt(os.Stdout),
-		MaxLvlOpt(LvlDebug),
-		DisableColorOpt(false),
-	)
-
+	global = newlogger()
 }
 
-func New(opt ...Option) Logger {
+func New(opt ...interface{}) Logger {
 	return global.New(opt...)
 }
-func With(opt ...Option) Logger {
+func With(opt ...interface{}) Logger {
 	return global.With(opt...)
 }
 func Crit(a ...interface{}) {

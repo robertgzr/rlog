@@ -4,60 +4,61 @@ import (
 	"bytes"
 	"fmt"
 	"strconv"
-	"sync"
+)
+
+const (
+	defaultCtxOpener    = "("
+	defaultCtxCloser    = ")"
+	defaultCtxDelimiter = " "
 )
 
 type Ctx struct {
-	m map[string]interface{}
-	k []string
-	x sync.Mutex
+	values      []interface{}
+	op, cl, del string
 }
 
-func newCtx() *Ctx {
-	return &Ctx{m: make(map[string]interface{}), k: []string{}}
+func newCtx() Ctx {
+	return Ctx{
+		values: make([]interface{}, 0),
+		op:     defaultCtxOpener,
+		cl:     defaultCtxCloser,
+		del:    defaultCtxDelimiter,
+	}
 }
 
+// Add takes a list in the form of ( (string, interface{}), ... )
 func (c *Ctx) Add(ctx []interface{}) {
 	if len(ctx) == 0 {
 		return
 	}
-	for i := 0; i < len(ctx); i += 2 {
-		k, ok := ctx[i].(string)
-		v := ctx[i+1]
-		if !ok {
-			panic(fmt.Sprintf("unable to parse \"%#+v\" (type '%[1]T') as ctx key, want type 'string'", ctx[i]))
-		}
-		c.Set(k, v)
+	if len(ctx)%2 != 0 {
+		panic("cannot append odd number of context elements")
 	}
-}
+	c.values = append(c.values, ctx...)
 
-func (c *Ctx) Set(k string, v interface{}) {
-	c.x.Lock()
-	defer c.x.Unlock()
-	c.m[k] = v
-	c.k = append(c.k, k)
-}
-func (c *Ctx) Delete(k string) {
-	c.x.Lock()
-	defer c.x.Unlock()
-	delete(c.m, k)
-	for i, e := range c.k {
-		if e == k {
-			c.k = append(c.k[:i], c.k[i+1:]...)
-			return
-		}
-	}
 }
 
 func (c *Ctx) String() string {
-	if len(c.m) == 0 {
+	if len(c.values) == 0 {
 		return ""
 	}
 	var buf bytes.Buffer
-	for _, k := range c.k {
-		buf.WriteString(fmt.Sprintf(" %s=%q", k, formatCtxValue(c.m[k])))
+	buf.WriteString(c.op)
+
+	for i := 0; i < len(c.values); i += 2 {
+		k, ok := c.values[i].(string)
+		v := c.values[i+1]
+		if !ok {
+			panic(fmt.Sprintf("unable to parse \"%#+v\" (type '%[1]T') as ctx key, want type 'string'", c.values[i]))
+		}
+
+		buf.WriteString(fmt.Sprintf("%s=%q", k, formatCtxValue(v)))
+		if i != len(c.values)-2 {
+			buf.WriteString(c.del)
+		}
 	}
-	buf.WriteString(" |")
+
+	buf.WriteString(c.cl)
 	return buf.String()
 }
 
