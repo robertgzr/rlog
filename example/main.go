@@ -6,20 +6,28 @@ import (
 
 func main() {
 	rlog.ParseEnv()
-	val_1 := 1000
-	val_2 := struct{}{}
-
-	rlog.Debug("using the global logger")
-	rlog.With("ctx", "is here").Info("info with context")
-	rlog.Warn("warning", val_1, val_2)
+	println("rlog demo\n=========")
+	println("\nlog levels:")
+	rlog.Debug("debug")
+	rlog.Info("info")
+	rlog.Warn("warning")
 	rlog.Error("error")
-	rlog.With("val_1", val_1, "val_2", val_2).Crit("critical")
+	rlog.Crit("critical")
 
-	l := rlog.New(rlog.LogTimeOpt())
-	l.Debug("using a new logger")
-	l.Info("set the logtime option")
-	l.Warn("warning")
-	l = l.With(rlog.SetOpenerCloserOpt(">> ", ""), rlog.SetDelimiterOpt(", "), "fail", true)
-	l.Error("error")
-	l.With("more_ctx", 0.0007).Crit("critical")
+	println("\nworks with more than `string`")
+	val_1 := 1000
+	val_2 := struct{ a int }{a: 9}
+	rlog.Warn("debug", val_1, val_2)
+
+	println("\nwith context:")
+	rlog.With("key", "value").Debug("logging with context")
+	rlog.With("val_1", val_1, "val_2", val_2).Error("ouch!")
+
+	println("\nyou can customize the output:")
+	rl := rlog.New(rlog.LogTimeOpt())
+	rl.Debug("using a new logger that also logs the time")
+	rl = rl.With(rlog.SetOpenerCloserOpt(">> ", ""), rlog.SetDelimiterOpt(", "), "has_name", "rl")
+	rl.Info("and has persistent context")
+	rl.Warn("and custom ctx opener/closer/delimiter")
+	rl.With("more_ctx", 0.0007).Error("critical")
 }
