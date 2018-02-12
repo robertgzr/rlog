@@ -1,14 +1,8 @@
 package rlog
 
-const defaultEnvKey = "GO_LOG"
-
-var (
-	envKey string
-	global Logger
-)
+var global Logger
 
 func init() {
-	envKey = defaultEnvKey
 	global = newlogger()
 }
 

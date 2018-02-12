@@ -2,13 +2,19 @@ package rlog
 
 import "os"
 
-func ParseEnv() {
-	maxLvl := parseEnv()
+const defaultEnvKey = "GO_LOG"
+
+func ParseEnv(a ...string) {
+	envKey := defaultEnvKey
+	if len(a) == 1 {
+		envKey = a[0]
+	}
+	maxLvl := parseEnv(envKey)
 	global = global.With(SetMaxLvlOpt(maxLvl))
 }
 
-func parseEnv() Lvl {
-	lvlstr := os.Getenv(envKey)
+func parseEnv(e string) Lvl {
+	lvlstr := os.Getenv(e)
 	if lvlstr == "" {
 		return LvlDebug
 	}
