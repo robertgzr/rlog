@@ -10,7 +10,7 @@ func ParseEnv(a ...string) {
 		envKey = a[0]
 	}
 	maxLvl := parseEnv(envKey)
-	global = global.With(SetMaxLvlOpt(maxLvl))
+	global = global.With(MaxLvl(maxLvl))
 }
 
 func parseEnv(e string) Lvl {

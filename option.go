@@ -8,76 +8,70 @@ type Option interface {
 	Apply(*logger)
 }
 
-type output struct {
-	w io.Writer
-}
+type outputOpt struct{ io.Writer }
 
-func SetOutputOpt(w io.Writer) Option {
-	return &output{w}
+func Output(w io.Writer) Option {
+	return outputOpt{w}
 }
-func (o *output) Apply(l *logger) {
-	l.out = o.w
+func (o outputOpt) Apply(l *logger) {
+	l.out = o.Writer
 }
 
 type maxLvl struct {
 	max Lvl
 }
 
-func SetMaxLvlOpt(max Lvl) Option {
-	return &maxLvl{max}
+func MaxLvl( max Lvl) Option {
+	return maxLvl{max}
 }
-func (o *maxLvl) Apply(l *logger) {
+func (o maxLvl) Apply(l *logger) {
 	l.maxLvl = o.max
 }
 
-type disableColor struct {
-	disable bool
+type colorOpt bool
+
+func Color(enabled bool) Option {
+	return colorOpt(enabled)
+}
+func (o colorOpt) Apply(l *logger) {
+	l.color = bool(o)
 }
 
-func DisableColorOpt(disable bool) Option {
-	return &disableColor{disable}
+type logtimeOpt bool
+
+func LogTime(enabled bool) Option {
+	return logtimeOpt(enabled)
 }
-func (o *disableColor) Apply(l *logger) {
-	l.color = !o.disable
+func (o logtimeOpt) Apply(l *logger) {
+	l.logtime = bool(o)
 }
 
-type logtime struct{}
-
-func LogTimeOpt() Option {
-	return new(logtime)
-}
-func (o *logtime) Apply(l *logger) {
-	l.logtime = true
-}
-
-type resetCtx struct{}
+type resetCtxOpt struct{}
 
 func ResetOpt() Option {
-	return new(resetCtx)
+	return resetCtxOpt{}
 }
-func (o *resetCtx) Apply(l *logger) {
+func (o resetCtxOpt) Apply(l *logger) {
 	l.ctx = newCtx()
 }
 
-type setOpenerCloser struct {
+type openerCloserOpt struct {
 	opener, closer string
 }
 
-func SetOpenerCloserOpt(opener, closer string) Option {
-	return &setOpenerCloser{opener, closer}
+func OpenerCloser(opener, closer string) Option {
+	return openerCloserOpt{opener, closer}
 }
-func (o *setOpenerCloser) Apply(l *logger) {
+func (o openerCloserOpt) Apply(l *logger) {
 	l.ctx.op = o.opener
 	l.ctx.cl = o.closer
 }
 
-type setDelimiter struct {
-	delimiter string
-}
+type delimiterOpt string
 
-func SetDelimiterOpt(delimiter string) Option {
-	return &setDelimiter{delimiter}
+func Delimiter(del string) Option {
+	return delimiterOpt(del)
 }
-func (o *setDelimiter) Apply(l *logger) {
-	l.ctx.del = o.delimiter
+func (o delimiterOpt) Apply(l *logger) {
+	l.ctx.del = string(o)
 }

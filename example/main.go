@@ -1,6 +1,8 @@
 package main
 
 import (
+	"os"
+
 	"github.com/robertgzr/rlog"
 )
 
@@ -24,9 +26,9 @@ func main() {
 	rlog.With("val_1", val_1, "val_2", val_2).Error("ouch!")
 
 	println("\nyou can customize the output:")
-	rl := rlog.New(rlog.LogTimeOpt())
+	rl := rlog.New(rlog.LogTime(true), rlog.Output(os.Stderr))
 	rl.Debug("using a new logger that also logs the time")
-	rl = rl.With(rlog.SetOpenerCloserOpt(">> ", ""), rlog.SetDelimiterOpt(", "), "has_name", "rl")
+	rl = rl.With(rlog.OpenerCloser(">> ", ""), rlog.Delimiter(", "), "has_name", "rl")
 	rl.Info("and has persistent context")
 	rl.Warn("and custom ctx opener/closer/delimiter")
 	rl.With("more_ctx", 0.0007).Error("critical")
