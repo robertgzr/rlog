@@ -1,6 +1,7 @@
 package rlog
 
 import (
+	"bytes"
 	"fmt"
 	"io"
 	"os"
@@ -65,16 +66,15 @@ func (l logger) write(lvl Lvl, a ...interface{}) {
 	}
 
 	a = append(a, l.ctx.String())
-	fmtr.Fprintf(l.out, "%s|%s %s",
-		strings.ToUpper(lvl.String()),
-		func() string {
-			if l.logtime {
-				return fmt.Sprintf("%s|", time.Now().Format(timeFormat))
-			}
-			return ""
-		}(),
-		fmt.Sprintln(a...),
-	)
+	var logstr bytes.Buffer
+	logstr.WriteString(strings.ToUpper(lvl.String()))
+	if l.logtime {
+		logstr.WriteRune('|')
+		logstr.WriteString(time.Now().Format(timeFormat))
+	}
+	logstr.WriteString("| ")
+	logstr.WriteString(fmt.Sprintln(a...))
+	fmtr.Fprintf(l.out, "%s", logstr.String())
 }
 
 // New creates a new logger and calls With(opt) on it.
