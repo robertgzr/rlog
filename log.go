@@ -1,123 +1,49 @@
 package rlog
 
 import (
-	"bytes"
-	"fmt"
-	"io"
 	"os"
-	"strings"
-	"time"
 
-	"github.com/fatih/color"
+	apex "github.com/apex/log"
 )
 
-const timeFormat = "060102.150405"
+var (
+	std = Logger{apex.Logger{
+		Handler: NewHandler(os.Stderr),
+		Level:   apex.DebugLevel,
+	}}
+)
 
-type Logger interface {
-	New(...interface{}) Logger
-	With(...interface{}) Logger
-
-	Crit(...interface{})
-	Error(...interface{})
-	Warn(...interface{})
-	Info(...interface{})
-	Debug(...interface{})
+type Logger struct {
+	apex.Logger
 }
 
-type logger struct {
-	out     io.Writer
-	maxLvl  Lvl
-	ctx     Ctx
-	logtime bool
-	color   bool
+type Fields apex.Fields
+
+func Debug(msg string) {
+	std.Debug(msg)
+}
+func Info(msg string) {
+	std.Info(msg)
+}
+func Warn(msg string) {
+	std.Warn(msg)
+}
+func Error(msg string) {
+	std.Error(msg)
+}
+func Fatal(msg string) {
+	std.Fatal(msg)
 }
 
-func newlogger() logger {
-	return logger{
-		ctx:    newCtx(),
-		out:    os.Stdout,
-		maxLvl: LvlDebug,
-		color:  true,
-	}
+func Trace(msg string) *apex.Entry {
+	return std.Trace(msg)
 }
-
-func (l logger) write(lvl Lvl, a ...interface{}) {
-	// apply maxLvl filter
-	if lvl > l.maxLvl {
-		return
-	}
-	// format the output
-	var attr color.Attribute
-	switch lvl {
-	case LvlCrit:
-		attr = color.FgMagenta
-	case LvlError:
-		attr = color.FgRed
-	case LvlWarn:
-		attr = color.FgYellow
-	case LvlInfo:
-		attr = color.Reset
-	case LvlDebug:
-		attr = color.FgCyan
-	}
-	fmtr := color.New(attr)
-	if !l.color {
-		fmtr.DisableColor()
-	}
-
-	a = append(a, l.ctx.String())
-	var logstr bytes.Buffer
-	logstr.WriteString(strings.ToUpper(lvl.String()))
-	if l.logtime {
-		logstr.WriteRune('|')
-		logstr.WriteString(time.Now().Format(timeFormat))
-	}
-	logstr.WriteString("| ")
-	logstr.WriteString(fmt.Sprintln(a...))
-	fmtr.Fprintf(l.out, "%s", logstr.String())
+func WithError(err error) *apex.Entry {
+	return std.WithError(err)
 }
-
-// New creates a new logger and calls With(opt) on it.
-//
-// See documentation of With for details.
-func (l logger) New(opt ...interface{}) Logger {
-	// return l.With(ResetOpt()).With(opt...)
-	return l.With(opt...)
+func WithField(key string, value interface{}) *apex.Entry {
+	return std.WithField(key, value)
 }
-
-// With returns a copy of the logger with changed options and context.
-// It doesn't modify the receiver.
-//
-// Takes a list of interface{}.
-// You can supply Option values optionally folled by (string, interface) pairs to set context
-func (l logger) With(opt ...interface{}) Logger {
-	for i, o := range opt {
-		if option, ok := o.(Option); ok {
-			option.Apply(&l)
-		} else {
-			l.ctx.Add(opt[i:])
-			break
-		}
-	}
-	return l
-}
-
-func (l logger) Crit(a ...interface{}) {
-	l.write(LvlCrit, a...)
-}
-
-func (l logger) Error(a ...interface{}) {
-	l.write(LvlError, a...)
-}
-
-func (l logger) Warn(a ...interface{}) {
-	l.write(LvlWarn, a...)
-}
-
-func (l logger) Info(a ...interface{}) {
-	l.write(LvlInfo, a...)
-}
-
-func (l logger) Debug(a ...interface{}) {
-	l.write(LvlDebug, a...)
+func WithFields(fields Fields) *apex.Entry {
+	return std.WithFields(apex.Fields(fields))
 }

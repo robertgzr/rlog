@@ -1,26 +1,28 @@
 package rlog
 
-import "os"
+import (
+	"os"
+
+	apex "github.com/apex/log"
+	"github.com/apex/log/handlers/level"
+)
 
 const defaultEnvKey = "GO_LOG"
 
-func ParseEnv(a ...string) {
-	envKey := defaultEnvKey
-	if len(a) == 1 {
-		envKey = a[0]
+func ParseEnv() {
+	env := os.Getenv(defaultEnvKey)
+	if env == "" {
+		return
 	}
-	maxLvl := parseEnv(envKey)
-	global = global.With(MaxLvl(maxLvl))
+
+	maxLvl := levelFromString(env)
+	std.Handler = level.New(std.Handler, maxLvl)
 }
 
-func parseEnv(e string) Lvl {
-	lvlstr := os.Getenv(e)
-	if lvlstr == "" {
-		return LvlDebug
+func levelFromString(env string) apex.Level {
+	if lvl, err := apex.ParseLevel(env); err != nil {
+		return apex.DebugLevel
+	} else {
+		return lvl
 	}
-	lvl, err := LvlFromString(lvlstr)
-	if err != nil {
-		return LvlDebug
-	}
-	return lvl
 }
