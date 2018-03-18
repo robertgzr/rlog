@@ -23,7 +23,7 @@ var colors = [...]*color.Color{
 }
 
 // Strings mapping.
-var strings = [...]string{
+var prefixes = [...]string{
 	apex.DebugLevel: "DBUG",
 	apex.InfoLevel:  "INFO",
 	apex.WarnLevel:  "WARN",
@@ -31,9 +31,11 @@ var strings = [...]string{
 	apex.FatalLevel: "CRIT",
 }
 
+type LvlMap map[string]apex.Level
+
 type Handler struct {
 	mu     sync.Mutex
-	Lvl    apex.Level
+	Lvls   LvlMap
 	Writer io.Writer
 }
 
@@ -41,18 +43,47 @@ func NewHandler(w io.Writer) apex.Handler {
 	if f, ok := w.(*os.File); ok {
 		return &Handler{
 			Writer: colorable.NewColorable(f),
+			Lvls:   LvlMap{"*": apex.DebugLevel},
 		}
 	}
 
 	return &Handler{
 		Writer: w,
+		Lvls:   LvlMap{"*": apex.DebugLevel},
+	}
+}
+
+func NewHandlerWithPkgMap(w io.Writer, lvlmap LvlMap) apex.Handler {
+	if f, ok := w.(*os.File); ok {
+		return &Handler{
+			Writer: colorable.NewColorable(f),
+			Lvls:   lvlmap,
+		}
+	}
+
+	return &Handler{
+		Writer: w,
+		Lvls:   lvlmap,
+	}
+}
+
+func (h *Handler) shouldLog(pkg string, e *apex.Entry) bool {
+	if maxLvl, ok := h.Lvls[pkg]; ok {
+		return e.Level >= maxLvl
+	} else {
+		return e.Level >= h.Lvls["*"]
 	}
 }
 
 func (h *Handler) HandleLog(e *apex.Entry) error {
+	pkg := getPackage()
+	if !h.shouldLog(pkg, e) {
+		return nil
+	}
+
 	var (
 		color = colors[e.Level]
-		level = strings[e.Level]
+		level = prefixes[e.Level]
 		names = e.Fields.Names()
 		msg   = e.Message
 	)

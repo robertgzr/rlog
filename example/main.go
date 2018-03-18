@@ -4,6 +4,8 @@ import (
 	"errors"
 
 	"github.com/robertgzr/rlog"
+
+	"./subpkg"
 )
 
 func main() {
@@ -27,6 +29,10 @@ func main() {
 	}).Error("ouch!")
 
 	errorFunc()
+
+	println("\nwe can log from subpackages as well")
+	subpkg.Do()
+	println("\n")
 
 	rlog.Fatal("fatal log exits process")
 }

@@ -1,17 +1,13 @@
 package rlog
 
 import (
-	"bytes"
 	"errors"
 	"testing"
 	"time"
-
-	"github.com/apex/log/handlers/discard"
 )
 
 func BenchmarkNoCtx(b *testing.B) {
-	buf := bytes.Buffer{}
-	std.Handler = NewHandler(&buf)
+	ParseEnv()
 
 	for i := 0; i < b.N; i++ {
 		Info("test message")
@@ -19,7 +15,7 @@ func BenchmarkNoCtx(b *testing.B) {
 }
 
 func BenchmarkDiscard(b *testing.B) {
-	std.Handler = discard.Default
+	ParseEnv()
 
 	for i := 0; i < b.N; i++ {
 		Info("test message")
@@ -41,7 +37,8 @@ var _jane = user{
 }
 
 func BenchmarkWithFields(b *testing.B) {
-	std.Handler = discard.Default
+	ParseEnv()
+
 	b.ResetTimer()
 	b.RunParallel(func(pb *testing.PB) {
 		for pb.Next() {

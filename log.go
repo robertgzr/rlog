@@ -7,8 +7,9 @@ import (
 )
 
 var (
-	std = Logger{apex.Logger{
-		Handler: NewHandler(os.Stderr),
+	defaultWriter = os.Stderr
+	std           = Logger{apex.Logger{
+		Handler: NewHandler(defaultWriter),
 		Level:   apex.DebugLevel,
 	}}
 )
