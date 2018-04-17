@@ -12,6 +12,8 @@ import (
 	colorable "github.com/mattn/go-colorable"
 )
 
+var Default = NewHandler(os.Stderr)
+
 var bold = color.New(color.Bold)
 
 var colors = [...]*color.Color{
@@ -40,10 +42,12 @@ type Handler struct {
 }
 
 func NewHandler(w io.Writer) apex.Handler {
+	lvlmap := parseEnv()
+
 	if f, ok := w.(*os.File); ok {
 		return &Handler{
 			Writer: colorable.NewColorable(f),
-			Lvls:   LvlMap{"*": apex.DebugLevel},
+			Lvls:   lvlmap,
 		}
 	}
 
@@ -100,7 +104,7 @@ func (h *Handler) HandleLog(e *apex.Entry) error {
 		if name == "source" {
 			continue
 		}
-		fmt.Fprintf(h.Writer, " %s=%#v", color.Sprint(name), e.Fields.Get(name))
+		fmt.Fprintf(h.Writer, " %s=%#v", bold.Sprint(color.Sprint(name)), e.Fields.Get(name))
 	}
 
 	fmt.Fprintln(h.Writer)

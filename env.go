@@ -10,22 +10,21 @@ import (
 const defaultEnvKey = "GO_LOG"
 
 func ParseEnv() {
-	env := os.Getenv(defaultEnvKey)
-	if env == "" {
-		return
-	}
-
-	lvlmap := levelFromString(env)
-	std.Handler = NewHandlerWithPkgMap(defaultWriter, lvlmap)
+	std.Warn("Calling `ParseEnv` explicitly is no longer neccessary")
 }
 
-func levelFromString(env string) LvlMap {
-	lvlmap := LvlMap{"*": apex.DebugLevel}
+func parseEnv() LvlMap {
+	var lvlmap = LvlMap{"*": apex.DebugLevel}
 
+	env := os.Getenv(defaultEnvKey)
 	if env == "" {
 		return lvlmap
 	}
 
+	return lvlsFromString(env, lvlmap)
+}
+
+func lvlsFromString(env string, lvlmap LvlMap) LvlMap {
 	lvlpairs := strings.Split(env, ",")
 	for _, lvlpair := range lvlpairs {
 		r := strings.Split(lvlpair, "=")

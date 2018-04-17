@@ -1,18 +1,13 @@
 package rlog
 
 import (
-	"os"
-
 	apex "github.com/apex/log"
 )
 
-var (
-	defaultWriter = os.Stderr
-	std           = Logger{apex.Logger{
-		Handler: NewHandler(defaultWriter),
-		Level:   apex.DebugLevel,
-	}}
-)
+var std = Logger{apex.Logger{
+	Handler: Default,
+	Level:   apex.DebugLevel,
+}}
 
 type Logger struct {
 	apex.Logger

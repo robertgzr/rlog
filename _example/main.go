@@ -3,13 +3,16 @@ package main
 import (
 	"errors"
 
+	"github.com/apex/log"
 	"github.com/robertgzr/rlog"
 
 	"./subpkg"
 )
 
 func main() {
-	rlog.ParseEnv()
+	log.SetHandler(rlog.Default)
+	log.Info("rlog can be used from apex/log by setting it as the log handler")
+	log.Warn("or on it's own... via a limited wrapper around apex/log\n")
 
 	println("rlog demo\n=========")
 	println("\nlog levels:")

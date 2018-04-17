@@ -3,5 +3,6 @@ package subpkg
 import "github.com/robertgzr/rlog"
 
 func Do() {
-	rlog.Debug("hello from subpackage")
+	rlog.Debug("debug from subpackage")
+	rlog.Error("error from subpackage")
 }
